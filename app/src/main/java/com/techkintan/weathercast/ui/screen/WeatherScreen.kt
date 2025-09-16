@@ -46,6 +46,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -73,22 +74,31 @@ fun WeatherScreen(
     viewModel: WeatherViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val lastCity by viewModel.lastCity.collectAsState()
 
     WeatherScreenContent(
         uiState = uiState,
+        initialCity = lastCity,
         onFetch = { city -> if (city.isNotBlank()) viewModel.fetchWeather(city) })
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun WeatherScreenContent(
-    uiState: WeatherUiState, onFetch: (String) -> Unit
+    uiState: WeatherUiState,
+    initialCity: String,
+    onFetch: (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
     var isGrid by rememberSaveable { mutableStateOf(false) }
 
-    var city by rememberSaveable { mutableStateOf("London") }
+    var city by rememberSaveable { mutableStateOf(initialCity) }
+    LaunchedEffect(initialCity) {
+        if (city.isBlank()) {
+            city = initialCity
+        }
+    }
     Scaffold(topBar = {
         TopAppBar(title = {
             Text(text = "3-Day Forecast")
@@ -210,7 +220,10 @@ fun ErrorState(message: String) {
         Image(
             imageVector = ImageVector.vectorResource(R.drawable.ic_bad),
             contentDescription = "Error",
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 64.dp).aspectRatio(1f)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 64.dp)
+                .aspectRatio(1f)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -433,6 +446,6 @@ private fun WeatherScreenPreview() {
     )
     WeatherCastTheme {
         WeatherScreenContent(
-            WeatherUiState.Success("London, GB", sample, offline = false), onFetch = {})
+            WeatherUiState.Success("London, GB", sample, offline = false), initialCity = "Navsari", onFetch = {})
     }
 }
