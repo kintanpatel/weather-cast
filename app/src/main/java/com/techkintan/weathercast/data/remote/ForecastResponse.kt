@@ -1,7 +1,7 @@
 package com.techkintan.weathercast.data.remote
 
+import com.google.gson.annotations.SerializedName
 import com.techkintan.weathercast.data.local.entity.ForecastEntity
-import com.techkintan.weathercast.ui.model.DailyForecast
 
 data class ForecastResponse(
     val list: List<WeatherItem>,
@@ -14,13 +14,26 @@ data class City(
 )
 
 data class WeatherItem(
-    val dt_txt: String,
+    @SerializedName("dt_txt")
+    val dtTxt: String,
     val main: Main,
     val weather: List<WeatherDescription>
 )
 
 data class Main(
-    val temp: Double
+    val temp: Double,
+
+    @SerializedName("feels_like")
+    val feelsLike: Double,
+
+    @SerializedName("temp_min")
+    val tempMin: Double,
+
+    @SerializedName("temp_max")
+    val tempMax: Double,
+
+    val pressure: Int,
+    val humidity: Int
 )
 
 data class WeatherDescription(
@@ -31,40 +44,39 @@ data class WeatherDescription(
 
 fun ForecastResponse.toEntities(): List<ForecastEntity> {
     val cityName = city.name
-    return list.groupBy { it.dt_txt.substring(0, 10) } // "yyyy-MM-dd"
+
+    return list.groupBy { it.dtTxt.substring(0, 10) } // Group by date only
         .toSortedMap()
         .entries
         .take(3)
         .map { (day, items) ->
-            val avg = items.map { it.main.temp }.average()
+            val avgTemp = items.map { it.main.temp }.average()
+            val feelsLikeAvg = items.map { it.main.feelsLike }.average()
+            val tempMin = items.minOf { it.main.tempMin }
+            val tempMax = items.maxOf { it.main.tempMax }
+            val pressureAvg = items.map { it.main.pressure }.average()
+            val humidityAvg = items.map { it.main.humidity }.average()
+
             val condition = items.mapNotNull { it.weather.firstOrNull()?.main }
                 .groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: "—"
-            val icon = items.firstOrNull()?.weather?.firstOrNull()?.icon ?: "01d"
+
+            val icon = items.find { "12:00:00" in it.dtTxt }
+                ?.weather?.firstOrNull()?.icon
+                ?: items.firstOrNull()?.weather?.firstOrNull()?.icon
+                ?: "01d"
+
             ForecastEntity(
-                city = cityName,
                 date = day,
-                avgTemp = avg,
+                city = cityName,
+                avgTemp = avgTemp,
+                tempMin = tempMin,
+                tempMax = tempMax,
+                feelsLike = feelsLikeAvg,
+                pressure = pressureAvg,
+                humidity = humidityAvg,
                 condition = condition,
                 icon = icon,
                 updatedAt = System.currentTimeMillis()
             )
         }
 }
-
-fun ForecastResponse.toThreeDayUI(): List<DailyForecast> =
-    list.groupBy { it.dt_txt.substring(0, 10) }   // "YYYY-MM-DD"
-        .toSortedMap()
-        .entries
-        .take(3)
-        .map { (date, items) ->
-            val avg = items.map { it.main.temp }.average()
-            val condition = items.mapNotNull { it.weather.firstOrNull()?.main }
-                .groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: "—"
-            val icon = items.firstOrNull()?.weather?.firstOrNull()?.icon ?: "01d"
-            DailyForecast(
-                date = date,
-                temp = "${kotlin.math.round(avg * 10) / 10.0}°C",
-                condition = condition,
-                iconId = icon
-            )
-        }

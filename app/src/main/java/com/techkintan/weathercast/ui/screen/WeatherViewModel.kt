@@ -3,7 +3,6 @@ package com.techkintan.weathercast.ui.screen
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.techkintan.weathercast.data.remote.toThreeDayUI
 import com.techkintan.weathercast.data.repository.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
