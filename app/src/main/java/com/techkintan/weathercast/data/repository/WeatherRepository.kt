@@ -5,6 +5,7 @@ import com.techkintan.weathercast.data.local.entity.toUi
 import com.techkintan.weathercast.data.remote.WeatherApi
 import com.techkintan.weathercast.data.remote.toEntities
 import com.techkintan.weathercast.helper.Result
+import com.techkintan.weathercast.helper.safeApiCall
 import com.techkintan.weathercast.ui.model.DailyForecast
 import javax.inject.Inject
 
@@ -28,7 +29,7 @@ class WeatherRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getForecast(city: String): Result<List<DailyForecast>> {
+    /*override suspend fun getForecast(city: String): Result<List<DailyForecast>> {
         return try {
             val response = api.getWeatherForecast(city = city, cnt = 24, apiKey = apiKey)
             val entities = response.toEntities()
@@ -42,5 +43,21 @@ class WeatherRepositoryImpl @Inject constructor(
                 Result.Error("Network error: ${e.message}", e)
             }
         }
+    }*/
+    override suspend fun getForecast(city: String): Result<List<DailyForecast>> {
+        val cached = dao.getByCityName(city)
+
+        return safeApiCall {
+            val response = api.getWeatherForecast(city = city, cnt = 24, apiKey = apiKey)
+            val entities = response.toEntities()
+            dao.replaceCity(city, entities)
+            entities.map { it.toUi() }
+        }.also { result ->
+            // Optional fallback to cached
+            if (result is Result.Error && cached.isNotEmpty()) {
+                return Result.Success(cached.map { it.toUi() })
+            }
+        }
     }
+
 }

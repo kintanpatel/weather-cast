@@ -10,18 +10,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.techkintan.weathercast.helper.Result
+import com.techkintan.weathercast.ui.screen.WeatherUiState.*
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
     private val repository: WeatherRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<WeatherUiState>(WeatherUiState.Idle)
+    private val _uiState = MutableStateFlow<WeatherUiState>(Idle)
     val uiState = _uiState.asStateFlow()
 
     fun fetchWeather(city: String) =
         viewModelScope.launch {
-            _uiState.value = WeatherUiState.Loading
+            _uiState.value = Loading
             when (val cachedResult = repository.getCached(city)) {
                 is Result.Success -> if (cachedResult.data.isNotEmpty()) {
                     _uiState.value = WeatherUiState.Success(city, cachedResult.data, offline = true)
@@ -34,22 +35,10 @@ class WeatherViewModel @Inject constructor(
                 else -> Unit
             }
             // Fetch Live
-            when (val liveResult = repository.getForecast(city)) {
-                is Result.Success -> {
-                    if (liveResult.data.isEmpty()) {
-                        _uiState.value = WeatherUiState.Error("No data.")
-                    } else {
-                        _uiState.value =
-                            WeatherUiState.Success(city, liveResult.data, offline = false)
-                    }
-                }
-
-                is Result.Error -> {
-                    _uiState.value = WeatherUiState.Error(liveResult.message)
-                }
-
-                else -> Unit
+            when (val result = repository.getForecast(city)) {
+                is Result.Success -> _uiState.value = Success(city, result.data, false)
+                is Result.Error -> _uiState.value = Error(result.message)
+                Result.Loading -> _uiState.value = Loading
             }
-
         }
 }

@@ -31,6 +31,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
@@ -59,6 +60,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -143,9 +145,8 @@ fun WeatherScreenContent(
                 }, enabled = city.isNotBlank()) { Text("Fetch") }
             }
             when (uiState) {
-                is WeatherUiState.Error -> Text(
-                    "Error: ${uiState.message}", color = MaterialTheme.colorScheme.error
-                )
+                is WeatherUiState.Error ->
+                    ErrorState(uiState.message)
 
                 is WeatherUiState.Idle -> Text("Enter a city and tap Fetch.")
                 is WeatherUiState.Loading -> Box(
@@ -194,6 +195,32 @@ fun WeatherScreenContent(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun ErrorState(message: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Image(
+            imageVector = ImageVector.vectorResource(R.drawable.ic_bad),
+            contentDescription = "Error",
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 64.dp).aspectRatio(1f)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = message,
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.error,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
