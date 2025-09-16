@@ -96,3 +96,4 @@ dependencies {
     implementation(libs.coil.compose)
 
 }
+kapt { correctErrorTypes = true }

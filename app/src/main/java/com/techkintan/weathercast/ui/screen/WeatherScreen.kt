@@ -99,6 +99,13 @@ fun WeatherScreenContent(
                 }
 
                 is WeatherUiState.Success -> {
+                    if (uiState.offline) {
+                        Text(
+                            "Showing cached data (offline).",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                     Text("City: ${uiState.city}", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -154,5 +161,5 @@ private fun WeatherScreenPreview() {
         DailyForecast("2025-09-17", "25.8°C", "Rain", "10d"),
         DailyForecast("2025-09-18", "29.1°C", "Clear", "01d")
     )
-    WeatherScreenContent(WeatherUiState.Success("London, GB", sample), onFetch = {})
+    WeatherScreenContent(WeatherUiState.Success("London, GB", sample,offline = false), onFetch = {})
 }

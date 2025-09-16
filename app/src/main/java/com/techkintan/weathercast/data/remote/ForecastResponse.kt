@@ -1,5 +1,6 @@
 package com.techkintan.weathercast.data.remote
 
+import com.techkintan.weathercast.data.local.entity.ForecastEntity
 import com.techkintan.weathercast.ui.model.DailyForecast
 
 data class ForecastResponse(
@@ -28,6 +29,27 @@ data class WeatherDescription(
     val main: String
 )
 
+fun ForecastResponse.toEntities(): List<ForecastEntity> {
+    val cityName = city.name
+    return list.groupBy { it.dt_txt.substring(0, 10) } // "yyyy-MM-dd"
+        .toSortedMap()
+        .entries
+        .take(3)
+        .map { (day, items) ->
+            val avg = items.map { it.main.temp }.average()
+            val condition = items.mapNotNull { it.weather.firstOrNull()?.main }
+                .groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: "—"
+            val icon = items.firstOrNull()?.weather?.firstOrNull()?.icon ?: "01d"
+            ForecastEntity(
+                city = cityName,
+                date = day,
+                avgTemp = avg,
+                condition = condition,
+                icon = icon,
+                updatedAt = System.currentTimeMillis()
+            )
+        }
+}
 
 fun ForecastResponse.toThreeDayUI(): List<DailyForecast> =
     list.groupBy { it.dt_txt.substring(0, 10) }   // "YYYY-MM-DD"

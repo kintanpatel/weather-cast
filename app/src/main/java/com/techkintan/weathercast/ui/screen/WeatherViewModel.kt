@@ -19,23 +19,26 @@ class WeatherViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<WeatherUiState>(WeatherUiState.Idle)
     val uiState = _uiState.asStateFlow()
 
-    fun fetchWeather(city: String) {
+    fun fetchWeather(city: String) =
         viewModelScope.launch {
             try {
                 _uiState.value = WeatherUiState.Loading
-                val response = repository.getForecast(city)
-                Log.d("WeatherViewModel", "City: ${response.city.name}, ${response.city.country}")
-                val items = response.toThreeDayUI()
-                if (items.isEmpty()) {
+                val catchData = repository.getCached(city)
+                if (catchData.isNotEmpty()) {
+                    _uiState.value = WeatherUiState.Success(city, catchData, true)
+                }
+
+                val liveData = repository.getForecast(city)
+                if (liveData.isEmpty()) {
                     _uiState.value = WeatherUiState.Error("No data.")
                 } else {
-                    _uiState.value = WeatherUiState.Success(city, items)
+                    _uiState.value = WeatherUiState.Success(city, liveData, false)
                 }
 
             } catch (e: Exception) {
                 Log.e("WeatherViewModel", "Error: ${e.message}", e)
                 _uiState.value = WeatherUiState.Error(e.localizedMessage ?: "Something went wrong")
             }
+
         }
-    }
 }
