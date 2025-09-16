@@ -19,9 +19,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             WeatherCastTheme {
+                val key = BuildConfig.OPEN_WEATHER_API_KEY
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
-                        name = "Android",
+                        name = "Android ${key}",
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
