@@ -6,7 +6,6 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
-import androidx.compose.animation.with
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,18 +20,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.ViewList
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
@@ -53,16 +52,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.techkintan.weathercast.R
 import com.techkintan.weathercast.ui.model.DailyForecast
+import com.techkintan.weathercast.ui.theme.WeatherCastTheme
 
 @Composable
 fun WeatherScreen(
@@ -82,6 +83,8 @@ fun WeatherScreenContent(
     uiState: WeatherUiState,
     onFetch: (String) -> Unit
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     var isGrid by rememberSaveable { mutableStateOf(false) }
 
     var city by rememberSaveable { mutableStateOf("London") }
@@ -89,6 +92,14 @@ fun WeatherScreenContent(
         TopAppBar(title = {
             Text(text = "3-Day Forecast")
         }, actions = {
+            IconButton(onClick = {
+                onFetch(city)
+            }) {
+                Icon(
+                    imageVector = Icons.Filled.Refresh,
+                    contentDescription = "Toggle View"
+                )
+            }
             IconButton(onClick = { isGrid = !isGrid }) {
                 AnimatedContent(targetState = isGrid, transitionSpec = {
                     fadeIn() togetherWith fadeOut()
@@ -98,7 +109,6 @@ fun WeatherScreenContent(
                         contentDescription = "Toggle View"
                     )
                 }
-
             }
         })
     }) { innerPadding ->
@@ -118,11 +128,21 @@ fun WeatherScreenContent(
                     onValueChange = { city = it },
                     label = { Text("City") },
                     singleLine = true,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(16.dp)),
+                    shape = RoundedCornerShape(16.dp),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = { onFetch(city) })
+                    keyboardActions = KeyboardActions(onSearch = {
+                        keyboardController?.hide()
+                        onFetch(city)
+                    })
                 )
-                Button(onClick = { onFetch(city) }, enabled = city.isNotBlank()) { Text("Fetch") }
+
+                Button(onClick = {
+                    keyboardController?.hide()
+                    onFetch(city)
+                }, enabled = city.isNotBlank()) { Text("Fetch") }
             }
             when (uiState) {
                 is WeatherUiState.Error -> Text(
@@ -174,8 +194,8 @@ fun WeatherScreenContent(
             }
         }
     }
-
 }
+
 @Composable
 fun ForecastGridCard(day: DailyForecast, modifier: Modifier = Modifier) {
     ElevatedCard(
@@ -233,13 +253,13 @@ fun ForecastGridCard(day: DailyForecast, modifier: Modifier = Modifier) {
                     style = MaterialTheme.typography.titleMedium
                 )
 
-                // 🧊 Min/Max (text only)
+
                 Text(
                     "↓ ${day.tempMin}  ↑ ${day.tempMax}",
                     style = MaterialTheme.typography.bodySmall
                 )
 
-                // 💧 Humidity (icon + text)
+
                 IconWithText(
                     iconRes = R.drawable.ic_humidity,
                     label = day.humidity
@@ -281,8 +301,7 @@ fun ForecastRow(day: DailyForecast) {
                         contentDescription = day.condition,
                         modifier = Modifier.size(36.dp)
                     )
-                    Column() {
-
+                    Column {
                         Text(day.date, style = MaterialTheme.typography.titleMedium)
                         Text(day.condition, style = MaterialTheme.typography.bodyMedium)
                     }
@@ -295,8 +314,10 @@ fun ForecastRow(day: DailyForecast) {
                 Spacer(Modifier.height(10.dp))
 
 
-                Row(verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_temp),
                         contentDescription = null,
@@ -352,7 +373,10 @@ private fun ForecastRowPreview() {
     ForecastRow(DailyForecast("2025-09-16", "27.3°C", "Clouds", "03d"))
 }*/
 
-@Preview(showBackground = true)
+@Preview(
+    showBackground = true,
+    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+)
 @Composable
 private fun WeatherScreenPreview() {
     val sample = listOf(
@@ -390,7 +414,9 @@ private fun WeatherScreenPreview() {
             iconId = "01d"
         )
     )
-    WeatherScreenContent(
-        WeatherUiState.Success("London, GB", sample, offline = false),
-        onFetch = {})
+    WeatherCastTheme {
+        WeatherScreenContent(
+            WeatherUiState.Success("London, GB", sample, offline = false),
+            onFetch = {})
+    }
 }
