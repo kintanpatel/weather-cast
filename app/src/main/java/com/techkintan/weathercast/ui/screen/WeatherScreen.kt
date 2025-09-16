@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -73,15 +74,13 @@ fun WeatherScreen(
 
     WeatherScreenContent(
         uiState = uiState,
-        onFetch = { city -> if (city.isNotBlank()) viewModel.fetchWeather(city) }
-    )
+        onFetch = { city -> if (city.isNotBlank()) viewModel.fetchWeather(city) })
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun WeatherScreenContent(
-    uiState: WeatherUiState,
-    onFetch: (String) -> Unit
+    uiState: WeatherUiState, onFetch: (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -96,8 +95,7 @@ fun WeatherScreenContent(
                 onFetch(city)
             }) {
                 Icon(
-                    imageVector = Icons.Filled.Refresh,
-                    contentDescription = "Toggle View"
+                    imageVector = Icons.Filled.Refresh, contentDescription = "Toggle View"
                 )
             }
             IconButton(onClick = { isGrid = !isGrid }) {
@@ -146,14 +144,12 @@ fun WeatherScreenContent(
             }
             when (uiState) {
                 is WeatherUiState.Error -> Text(
-                    "Error: ${uiState.message}",
-                    color = MaterialTheme.colorScheme.error
+                    "Error: ${uiState.message}", color = MaterialTheme.colorScheme.error
                 )
 
                 is WeatherUiState.Idle -> Text("Enter a city and tap Fetch.")
                 is WeatherUiState.Loading -> Box(
-                    Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
+                    Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
                 }
@@ -181,7 +177,12 @@ fun WeatherScreenContent(
                                 }
                             }
                         } else {
-                            LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxHeight(),
+                                verticalArrangement = Arrangement.spacedBy(10.dp),
+                                contentPadding =
+                                    PaddingValues(vertical = 8.dp)
+                            ) {
                                 items(uiState.items) { day ->
                                     ForecastRow(day)
                                 }
@@ -204,12 +205,11 @@ fun ForecastGridCard(day: DailyForecast, modifier: Modifier = Modifier) {
             .padding(6.dp)
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
 
             Image(
-                imageVector = ImageVector.vectorResource(getWeatherIcon(day.iconId)),
+                imageVector = ImageVector.vectorResource(getWeatherIcon(day.condition)),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxSize()
@@ -220,9 +220,7 @@ fun ForecastGridCard(day: DailyForecast, modifier: Modifier = Modifier) {
 
             // Foreground weather details
             Column(
-                modifier = Modifier
-                    .padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+                modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -236,33 +234,29 @@ fun ForecastGridCard(day: DailyForecast, modifier: Modifier = Modifier) {
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
-                            day.condition,
-                            style = MaterialTheme.typography.labelSmall
+                            day.condition, style = MaterialTheme.typography.labelSmall
                         )
                     }
 
                     Image(
-                        imageVector = ImageVector.vectorResource(getWeatherIcon(day.iconId)),
+                        imageVector = ImageVector.vectorResource(getWeatherIcon(day.condition)),
                         contentDescription = day.condition,
                         modifier = Modifier.size(30.dp)
                     )
                 }
 
                 Text(
-                    day.avgTemp,
-                    style = MaterialTheme.typography.titleMedium
+                    day.avgTemp, style = MaterialTheme.typography.titleMedium
                 )
 
 
                 Text(
-                    "↓ ${day.tempMin}  ↑ ${day.tempMax}",
-                    style = MaterialTheme.typography.bodySmall
+                    "↓ ${day.tempMin}  ↑ ${day.tempMax}", style = MaterialTheme.typography.bodySmall
                 )
 
 
                 IconWithText(
-                    iconRes = R.drawable.ic_humidity,
-                    label = day.humidity
+                    iconRes = R.drawable.ic_humidity, label = day.humidity
                 )
             }
         }
@@ -280,7 +274,7 @@ fun ForecastRow(day: DailyForecast) {
         Box {
             // Faded Background Icon
             Image(
-                imageVector = ImageVector.vectorResource(getWeatherIcon(day.iconId)),
+                imageVector = ImageVector.vectorResource(getWeatherIcon(day.condition)),
                 contentDescription = null,
                 modifier = Modifier
                     .fillMaxSize()
@@ -297,7 +291,7 @@ fun ForecastRow(day: DailyForecast) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(
-                        imageVector = ImageVector.vectorResource(getWeatherIcon(day.iconId)),
+                        imageVector = ImageVector.vectorResource(getWeatherIcon(day.condition)),
                         contentDescription = day.condition,
                         modifier = Modifier.size(36.dp)
                     )
@@ -337,20 +331,19 @@ fun ForecastRow(day: DailyForecast) {
     }
 }
 
-
-fun getWeatherIcon(iconCode: String): Int {
-    return when (iconCode) {
-        "01d", "01n" -> R.drawable.ic_clear_day
-        "02d", "02n" -> R.drawable.ic_scattered_clouds
-        "03d", "03n" -> R.drawable.ic_unknown
-        "09d", "09n" -> R.drawable.ic_shower_rain
-        "10d", "10n" -> R.drawable.ic_rain
-        "11d", "11n" -> R.drawable.ic_thunderstorm
-        "13d", "13n" -> R.drawable.ic_snow
-        "50d", "50n" -> R.drawable.ic_mist
+fun getWeatherIcon(condition: String): Int {
+    return when (condition.lowercase()) {
+        "clear" -> R.drawable.ic_clear_day
+        "clouds" -> R.drawable.ic_scattered_clouds
+        "rain" -> R.drawable.ic_rain
+        "drizzle" -> R.drawable.ic_shower_rain
+        "thunderstorm" -> R.drawable.ic_thunderstorm
+        "snow" -> R.drawable.ic_snow
+        "mist", "fog", "haze", "smoke", "dust", "sand", "ash", "squall", "tornado" -> R.drawable.ic_mist
         else -> R.drawable.ic_unknown
     }
 }
+
 
 @Composable
 fun IconWithText(iconRes: Int, label: String) {
@@ -374,8 +367,7 @@ private fun ForecastRowPreview() {
 }*/
 
 @Preview(
-    showBackground = true,
-    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
+    showBackground = true, uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES
 )
 @Composable
 private fun WeatherScreenPreview() {
@@ -390,8 +382,7 @@ private fun WeatherScreenPreview() {
             humidity = "68%",
             condition = "Clouds",
             iconId = "03d"
-        ),
-        DailyForecast(
+        ), DailyForecast(
             date = "2025-09-17",
             avgTemp = "25.8°C",
             tempMin = "24.5°C",
@@ -401,8 +392,7 @@ private fun WeatherScreenPreview() {
             humidity = "72%",
             condition = "Rain",
             iconId = "10d"
-        ),
-        DailyForecast(
+        ), DailyForecast(
             date = "2025-09-18",
             avgTemp = "29.1°C",
             tempMin = "27.8°C",
@@ -416,7 +406,6 @@ private fun WeatherScreenPreview() {
     )
     WeatherCastTheme {
         WeatherScreenContent(
-            WeatherUiState.Success("London, GB", sample, offline = false),
-            onFetch = {})
+            WeatherUiState.Success("London, GB", sample, offline = false), onFetch = {})
     }
 }

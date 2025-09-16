@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.techkintan.weathercast.helper.Result
 
 @HiltViewModel
 class WeatherViewModel @Inject constructor(
@@ -20,23 +21,34 @@ class WeatherViewModel @Inject constructor(
 
     fun fetchWeather(city: String) =
         viewModelScope.launch {
-            try {
-                _uiState.value = WeatherUiState.Loading
-                val catchData = repository.getCached(city)
-                if (catchData.isNotEmpty()) {
-                    _uiState.value = WeatherUiState.Success(city, catchData, true)
+            _uiState.value = WeatherUiState.Loading
+            when (val cachedResult = repository.getCached(city)) {
+                is Result.Success -> if (cachedResult.data.isNotEmpty()) {
+                    _uiState.value = WeatherUiState.Success(city, cachedResult.data, offline = true)
                 }
 
-                val liveData = repository.getForecast(city)
-                if (liveData.isEmpty()) {
-                    _uiState.value = WeatherUiState.Error("No data.")
-                } else {
-                    _uiState.value = WeatherUiState.Success(city, liveData, false)
+                is Result.Error -> {
+                    Log.w("WeatherVM", "Cached fetch failed: ${cachedResult.message}")
                 }
 
-            } catch (e: Exception) {
-                Log.e("WeatherViewModel", "Error: ${e.message}", e)
-                _uiState.value = WeatherUiState.Error(e.localizedMessage ?: "Something went wrong")
+                else -> Unit
+            }
+            // Fetch Live
+            when (val liveResult = repository.getForecast(city)) {
+                is Result.Success -> {
+                    if (liveResult.data.isEmpty()) {
+                        _uiState.value = WeatherUiState.Error("No data.")
+                    } else {
+                        _uiState.value =
+                            WeatherUiState.Success(city, liveResult.data, offline = false)
+                    }
+                }
+
+                is Result.Error -> {
+                    _uiState.value = WeatherUiState.Error(liveResult.message)
+                }
+
+                else -> Unit
             }
 
         }
