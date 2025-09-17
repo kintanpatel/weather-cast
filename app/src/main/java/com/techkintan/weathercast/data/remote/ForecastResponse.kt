@@ -2,6 +2,7 @@ package com.techkintan.weathercast.data.remote
 
 import com.google.gson.annotations.SerializedName
 import com.techkintan.weathercast.data.local.entity.ForecastEntity
+import com.techkintan.weathercast.helper.normalizedCity
 
 data class ForecastResponse(
     val list: List<WeatherItem>,
@@ -43,7 +44,8 @@ data class WeatherDescription(
 )
 
 fun ForecastResponse.toEntities(): List<ForecastEntity> {
-    val cityName = city.name
+    val cityName = city.name.normalizedCity()
+
 
     return list.groupBy { it.dtTxt.substring(0, 10) } // Group by date only
         .toSortedMap()

@@ -5,7 +5,7 @@ import com.techkintan.weathercast.ui.model.DailyForecast
 sealed class WeatherUiState() {
     object Idle : WeatherUiState()
     object Loading : WeatherUiState()
-    data class Success(val city: String, val items: List<DailyForecast>, val offline: Boolean) :
+    data class Success(val city: String, val items: List<DailyForecast>) :
         WeatherUiState()
 
     data class Error(val message: String) : WeatherUiState()

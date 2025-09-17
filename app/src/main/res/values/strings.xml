@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">WeatherCast</string>
+    <string name="city">City</string>
+    <string name="fetch">Fetch</string>
+    <string name="enter_a_city_and_tap_fetch">Enter a city and tap Fetch.</string>
 </resources>

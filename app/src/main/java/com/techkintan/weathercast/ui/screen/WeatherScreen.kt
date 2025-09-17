@@ -31,7 +31,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
-import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
@@ -59,6 +58,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -66,6 +66,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.techkintan.weathercast.R
+import com.techkintan.weathercast.helper.toIndianDateFormatted
 import com.techkintan.weathercast.ui.model.DailyForecast
 import com.techkintan.weathercast.ui.theme.WeatherCastTheme
 
@@ -101,7 +102,7 @@ fun WeatherScreenContent(
     }
     Scaffold(topBar = {
         TopAppBar(title = {
-            Text(text = "3-Day Forecast")
+            Text(text = stringResource(id = R.string.app_name))
         }, actions = {
             IconButton(onClick = {
                 onFetch(city)
@@ -136,7 +137,7 @@ fun WeatherScreenContent(
                 OutlinedTextField(
                     value = city,
                     onValueChange = { city = it },
-                    label = { Text("City") },
+                    label = { Text(stringResource(R.string.city)) },
                     singleLine = true,
                     modifier = Modifier
                         .weight(1f)
@@ -152,13 +153,13 @@ fun WeatherScreenContent(
                 Button(onClick = {
                     keyboardController?.hide()
                     onFetch(city)
-                }, enabled = city.isNotBlank()) { Text("Fetch") }
+                }, enabled = city.isNotBlank()) { Text(stringResource(R.string.fetch)) }
             }
             when (uiState) {
                 is WeatherUiState.Error ->
                     ErrorState(uiState.message)
 
-                is WeatherUiState.Idle -> Text("Enter a city and tap Fetch.")
+                is WeatherUiState.Idle -> Text(stringResource(R.string.enter_a_city_and_tap_fetch))
                 is WeatherUiState.Loading -> Box(
                     Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
@@ -166,13 +167,6 @@ fun WeatherScreenContent(
                 }
 
                 is WeatherUiState.Success -> {
-                    if (uiState.offline) {
-                        Text(
-                            "Showing cached data (offline).",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
                     Text("City: ${uiState.city}", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(8.dp))
                     Crossfade(targetState = isGrid, label = "ViewToggle") { grid ->
@@ -269,7 +263,7 @@ fun ForecastGridCard(day: DailyForecast, modifier: Modifier = Modifier) {
                 ) {
                     Column {
                         Text(
-                            day.date,
+                            day.date.toIndianDateFormatted(),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
@@ -336,7 +330,7 @@ fun ForecastRow(day: DailyForecast) {
                         modifier = Modifier.size(36.dp)
                     )
                     Column {
-                        Text(day.date, style = MaterialTheme.typography.titleMedium)
+                        Text(day.date.toIndianDateFormatted(), style = MaterialTheme.typography.titleMedium)
                         Text(day.condition, style = MaterialTheme.typography.bodyMedium)
                     }
 
@@ -446,6 +440,6 @@ private fun WeatherScreenPreview() {
     )
     WeatherCastTheme {
         WeatherScreenContent(
-            WeatherUiState.Success("London, GB", sample, offline = false), initialCity = "Navsari", onFetch = {})
+            WeatherUiState.Success("London, GB", sample), initialCity = "Navsari", onFetch = {})
     }
 }

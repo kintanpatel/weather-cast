@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import com.techkintan.weathercast.helper.Result
+import com.techkintan.weathercast.helper.normalizedCity
 import com.techkintan.weathercast.ui.screen.WeatherUiState.*
 import kotlinx.coroutines.flow.collectLatest
 
@@ -44,7 +45,7 @@ class WeatherViewModel @Inject constructor(
     private suspend fun fetchCachedOnly(city: String) {
         when (val cachedResult = repository.getCached(city)) {
             is Result.Success -> if (cachedResult.data.isNotEmpty()) {
-                _uiState.value = WeatherUiState.Success(city, cachedResult.data, offline = true)
+                _uiState.value = WeatherUiState.Success(city, cachedResult.data)
             }
 
             is Result.Error -> {
@@ -60,7 +61,7 @@ class WeatherViewModel @Inject constructor(
             _uiState.value = Loading
             when (val cachedResult = repository.getCached(city)) {
                 is Result.Success -> if (cachedResult.data.isNotEmpty()) {
-                    _uiState.value = WeatherUiState.Success(city, cachedResult.data, offline = true)
+                    _uiState.value = WeatherUiState.Success(city, cachedResult.data)
                 }
 
                 is Result.Error -> {
@@ -72,7 +73,7 @@ class WeatherViewModel @Inject constructor(
             // Fetch Live
             when (val result = repository.getForecast(city)) {
                 is Result.Success -> {
-                    _uiState.value = Success(city, result.data, false)
+                    _uiState.value = Success(city, result.data)
                     cityPrefs.saveCity(city)
                 }
 

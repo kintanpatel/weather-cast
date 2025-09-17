@@ -5,6 +5,7 @@ import com.techkintan.weathercast.data.local.entity.toUi
 import com.techkintan.weathercast.data.remote.WeatherApi
 import com.techkintan.weathercast.data.remote.toEntities
 import com.techkintan.weathercast.helper.Result
+import com.techkintan.weathercast.helper.normalizedCity
 import com.techkintan.weathercast.helper.safeApiCall
 import com.techkintan.weathercast.ui.model.DailyForecast
 import javax.inject.Inject
@@ -21,7 +22,7 @@ class WeatherRepositoryImpl @Inject constructor(
 ) : WeatherRepository {
     override suspend fun getCached(city: String): com.techkintan.weathercast.helper.Result<List<DailyForecast>> {
         return try {
-            val data = dao.getByCityName(city).map { it.toUi() }
+            val data = dao.getByCityName(city.normalizedCity()).map { it.toUi() }
             Result.Success(data)
 
         } catch (e: Exception) {
@@ -45,7 +46,7 @@ class WeatherRepositoryImpl @Inject constructor(
         }
     }*/
     override suspend fun getForecast(city: String): Result<List<DailyForecast>> {
-        val cached = dao.getByCityName(city)
+        val cached = dao.getByCityName(city.normalizedCity())
 
         return safeApiCall {
             val response = api.getWeatherForecast(city = city, cnt = 24, apiKey = apiKey)
