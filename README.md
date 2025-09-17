@@ -61,8 +61,8 @@ OPEN_WEATHER_API_KEY = <Your API Key>
 | Light Mode                           | Dark Mode                          |
 | ------------------------------------ | ---------------------------------- |
 | ![Light](screenshots/light_mode.png) | ![Dark](screenshots/dark_mode.png) |
+| ![Light](screenshots/light_mode_grid.png) | ![Dark](screenshots/dark_mode_grid.png) |
 
-> Note: Add your screenshots in a `screenshots/` folder under the project root.
 
 ---
 
