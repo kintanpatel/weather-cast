@@ -7,6 +7,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -31,9 +34,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -43,12 +48,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -130,7 +137,13 @@ fun WeatherScreenContent(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Row(
+            CityInputBar(
+                city = city,
+                onCityChange = { city = it },
+                onFetch = { keyboardController?.hide()
+                    onFetch(city) }
+            )
+            /*Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -154,7 +167,7 @@ fun WeatherScreenContent(
                     keyboardController?.hide()
                     onFetch(city)
                 }, enabled = city.isNotBlank()) { Text(stringResource(R.string.fetch)) }
-            }
+            }*/
             when (uiState) {
                 is WeatherUiState.Error ->
                     ErrorState(uiState.message)
@@ -167,8 +180,6 @@ fun WeatherScreenContent(
                 }
 
                 is WeatherUiState.Success -> {
-                    Text("City: ${uiState.city}", style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(8.dp))
                     Crossfade(targetState = isGrid, label = "ViewToggle") { grid ->
                         if (grid) {
                             LazyVerticalGrid(
@@ -296,6 +307,83 @@ fun ForecastGridCard(day: DailyForecast, modifier: Modifier = Modifier) {
         }
     }
 }
+@Composable
+fun CityInputBar(
+    city: String,
+    onCityChange: (String) -> Unit,
+    onFetch: (String) -> Unit
+) {
+    var showDialog by remember { mutableStateOf(false) }
+
+    // This row shows current city and triggers dialog on tap
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clickable { showDialog = true }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(Icons.Default.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text = if (city.isNotBlank()) city else "Tap to enter city",
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (city.isNotBlank()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.weight(1f))
+        Icon(Icons.Default.Edit, contentDescription = "Edit")
+    }
+
+    // Dialog input for city name
+    if (showDialog) {
+        var input by remember { mutableStateOf(city) }
+        val keyboardController = LocalSoftwareKeyboardController.current
+
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("Enter City") },
+            text = {
+                OutlinedTextField(
+                    value = input,
+                    onValueChange = { input = it },
+                    label = { Text("City") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                    keyboardActions = KeyboardActions(
+                        onSearch = {
+                            keyboardController?.hide()
+                            if (input.isNotBlank()) {
+                                onCityChange(input)
+                                onFetch(input)
+                                showDialog = false
+                            }
+                        }
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    keyboardController?.hide()
+                    if (input.isNotBlank()) {
+                        onCityChange(input)
+                        onFetch(input)
+                        showDialog = false
+                    }
+                }) {
+                    Text("Fetch")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+}
+
 
 
 @Composable
