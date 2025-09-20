@@ -82,11 +82,9 @@ fun WeatherScreen(
     viewModel: WeatherViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val lastCity by viewModel.lastCity.collectAsState()
 
     WeatherScreenContent(
         uiState = uiState,
-        initialCity = lastCity,
         onFetch = { city -> if (city.isNotBlank()) viewModel.fetchWeather(city) })
 }
 
@@ -94,19 +92,21 @@ fun WeatherScreen(
 @Composable
 fun WeatherScreenContent(
     uiState: WeatherUiState,
-    initialCity: String,
     onFetch: (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
     var isGrid by rememberSaveable { mutableStateOf(false) }
 
-    var city by rememberSaveable { mutableStateOf(initialCity) }
-    LaunchedEffect(initialCity) {
-        if (city.isBlank()) {
-            city = initialCity
+    var city by rememberSaveable { mutableStateOf("") }
+
+    // Sync city state with DB result (uiState)
+    LaunchedEffect(uiState) {
+        if (uiState is WeatherUiState.Success) {
+            city = uiState.city
         }
     }
+
     Scaffold(topBar = {
         TopAppBar(title = {
             Text(text = stringResource(id = R.string.app_name))
@@ -140,34 +140,11 @@ fun WeatherScreenContent(
             CityInputBar(
                 city = city,
                 onCityChange = { city = it },
-                onFetch = { keyboardController?.hide()
-                    onFetch(city) }
-            )
-            /*Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                OutlinedTextField(
-                    value = city,
-                    onValueChange = { city = it },
-                    label = { Text(stringResource(R.string.city)) },
-                    singleLine = true,
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(16.dp)),
-                    shape = RoundedCornerShape(16.dp),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    keyboardActions = KeyboardActions(onSearch = {
-                        keyboardController?.hide()
-                        onFetch(city)
-                    })
-                )
-
-                Button(onClick = {
+                onFetch = {
                     keyboardController?.hide()
                     onFetch(city)
-                }, enabled = city.isNotBlank()) { Text(stringResource(R.string.fetch)) }
-            }*/
+                }
+            )
             when (uiState) {
                 is WeatherUiState.Error ->
                     ErrorState(uiState.message)
@@ -291,7 +268,7 @@ fun ForecastGridCard(day: DailyForecast, modifier: Modifier = Modifier) {
                 }
 
                 Text(
-                    day.avgTemp, style = MaterialTheme.typography.titleMedium
+                    day.temp, style = MaterialTheme.typography.titleMedium
                 )
 
 
@@ -307,6 +284,7 @@ fun ForecastGridCard(day: DailyForecast, modifier: Modifier = Modifier) {
         }
     }
 }
+
 @Composable
 fun CityInputBar(
     city: String,
@@ -325,10 +303,14 @@ fun CityInputBar(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(Icons.Default.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Icon(
+            Icons.Default.LocationOn,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
         Spacer(Modifier.width(8.dp))
         Text(
-            text = if (city.isNotBlank()) city else "Tap to enter city",
+            text = city.ifBlank { "Tap to enter city" },
             style = MaterialTheme.typography.bodyLarge,
             color = if (city.isNotBlank()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -385,7 +367,6 @@ fun CityInputBar(
 }
 
 
-
 @Composable
 fun ForecastRow(day: DailyForecast) {
     ElevatedCard(
@@ -418,12 +399,15 @@ fun ForecastRow(day: DailyForecast) {
                         modifier = Modifier.size(36.dp)
                     )
                     Column {
-                        Text(day.date.toIndianDateFormatted(), style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            day.date,
+                            style = MaterialTheme.typography.titleMedium
+                        )
                         Text(day.condition, style = MaterialTheme.typography.bodyMedium)
                     }
 
                     Spacer(modifier = Modifier.weight(1f))
-                    Text("${day.avgTemp}%", style = MaterialTheme.typography.titleMedium)
+                    Text(day.temp, style = MaterialTheme.typography.titleMedium)
 
                 }
 
@@ -496,38 +480,35 @@ private fun WeatherScreenPreview() {
     val sample = listOf(
         DailyForecast(
             date = "2025-09-16",
-            avgTemp = "27.3°C",
+            temp = "27.3°C",
             tempMin = "25.9°C",
             tempMax = "29.2°C",
             feelsLike = "28.0°C",
             pressure = "1012 hPa",
             humidity = "68%",
-            condition = "Clouds",
-            iconId = "03d"
+            condition = "Clouds"
         ), DailyForecast(
             date = "2025-09-17",
-            avgTemp = "25.8°C",
+            temp = "25.8°C",
             tempMin = "24.5°C",
             tempMax = "27.1°C",
             feelsLike = "26.2°C",
             pressure = "1011 hPa",
             humidity = "72%",
-            condition = "Rain",
-            iconId = "10d"
+            condition = "Rain"
         ), DailyForecast(
             date = "2025-09-18",
-            avgTemp = "29.1°C",
+            temp = "29.1°C",
             tempMin = "27.8°C",
             tempMax = "30.5°C",
             feelsLike = "30.0°C",
             pressure = "1013 hPa",
             humidity = "65%",
-            condition = "Clear",
-            iconId = "01d"
+            condition = "Clear"
         )
     )
     WeatherCastTheme {
         WeatherScreenContent(
-            WeatherUiState.Success("London, GB", sample), initialCity = "Navsari", onFetch = {})
+            WeatherUiState.Success("London, GB", sample), onFetch = {})
     }
 }

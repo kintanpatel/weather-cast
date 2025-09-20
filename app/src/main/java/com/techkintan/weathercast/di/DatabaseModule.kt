@@ -2,7 +2,7 @@ package com.techkintan.weathercast.di
 
 import android.content.Context
 import androidx.room.Room
-import com.techkintan.weathercast.data.local.dao.ForecastDao
+import com.techkintan.weathercast.data.local.dao.WeatherDao
 import com.techkintan.weathercast.data.local.db.AppDatabase
 import dagger.Module
 import dagger.Provides
@@ -25,5 +25,5 @@ object DatabaseModule {
         ).build()
 
     @Provides
-    fun provideForecastDao(db: AppDatabase): ForecastDao = db.forecastDao()
+    fun provideForecastDao(db: AppDatabase): WeatherDao = db.forecastDao()
 }

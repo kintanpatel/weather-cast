@@ -12,12 +12,12 @@ import javax.inject.Singleton
 class CityPreferenceManager @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) {
-    suspend fun saveCity(city: String) {
+    suspend fun updateLastCityId(cityId: Long) {
         dataStore.edit { prefs ->
-            prefs[PreferenceKeys.LAST_CITY] = city
+            prefs[PreferenceKeys.LAST_CITY_ID] = cityId
         }
     }
 
-    val lastCityFlow: Flow<String?> = dataStore.data
-        .map { prefs -> prefs[PreferenceKeys.LAST_CITY] }
+    val lastCityIdFlow: Flow<Long?> = dataStore.data
+        .map { prefs -> prefs[PreferenceKeys.LAST_CITY_ID] }
 }

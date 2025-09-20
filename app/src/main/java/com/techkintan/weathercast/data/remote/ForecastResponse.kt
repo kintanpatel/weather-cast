@@ -1,8 +1,9 @@
 package com.techkintan.weathercast.data.remote
 
 import com.google.gson.annotations.SerializedName
+import com.techkintan.weathercast.data.local.entity.CityEntity
 import com.techkintan.weathercast.data.local.entity.ForecastEntity
-import com.techkintan.weathercast.helper.normalizedCity
+
 
 data class ForecastResponse(
     val list: List<WeatherItem>,
@@ -10,6 +11,7 @@ data class ForecastResponse(
 )
 
 data class City(
+    val id: Long,
     val name: String,
     val country: String
 )
@@ -17,6 +19,7 @@ data class City(
 data class WeatherItem(
     @SerializedName("dt_txt")
     val dtTxt: String,
+    val dt: Long,
     val main: Main,
     val weather: List<WeatherDescription>
 )
@@ -43,42 +46,45 @@ data class WeatherDescription(
     val main: String
 )
 
+
+fun City.toEntity(): CityEntity = CityEntity(
+    id = id,
+    name = name,
+    country = country
+)
+
 fun ForecastResponse.toEntities(): List<ForecastEntity> {
-    val cityName = city.name.normalizedCity()
-
-
-    return list.groupBy { it.dtTxt.substring(0, 10) } // Group by date only
-        .toSortedMap()
-        .entries
-        .take(3)
-        .map { (day, items) ->
-            val avgTemp = items.map { it.main.temp }.average()
-            val feelsLikeAvg = items.map { it.main.feelsLike }.average()
-            val tempMin = items.minOf { it.main.tempMin }
-            val tempMax = items.maxOf { it.main.tempMax }
-            val pressureAvg = items.map { it.main.pressure }.average()
-            val humidityAvg = items.map { it.main.humidity }.average()
-
-            val condition = items.mapNotNull { it.weather.firstOrNull()?.main }
-                .groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: "—"
-
-            val icon = items.find { "12:00:00" in it.dtTxt }
-                ?.weather?.firstOrNull()?.icon
-                ?: items.firstOrNull()?.weather?.firstOrNull()?.icon
-                ?: "01d"
-
-            ForecastEntity(
-                date = day,
-                city = cityName,
-                avgTemp = avgTemp,
-                tempMin = tempMin,
-                tempMax = tempMax,
-                feelsLike = feelsLikeAvg,
-                pressure = pressureAvg,
-                humidity = humidityAvg,
-                condition = condition,
-                icon = icon,
-                updatedAt = System.currentTimeMillis()
-            )
-        }
+    return list.map { fc ->
+        ForecastEntity(
+            cityId = city.id,
+            dt = fc.dt,                           // forecast timestamp
+            date = fc.dtTxt,                      // human-readable datetime
+            temp = fc.main.temp,
+            tempMin = fc.main.tempMin,
+            tempMax = fc.main.tempMax,
+            feelsLike = fc.main.feelsLike,
+            pressure = fc.main.pressure,
+            humidity = fc.main.humidity,
+            condition = fc.weather.firstOrNull()?.main ?: "—",
+            updatedAt = System.currentTimeMillis()
+        )
+    }
 }
+
+/*fun ForecastResponse.toEntities(): List<ForecastEntity> {
+    val fc = list.first()
+    return list.map {
+        ForecastEntity(
+        cityId = city.id,
+        dt = fc.dt,
+        date = fc.dtTxt,
+        temp = fc.main.temp,
+        tempMin = fc.main.tempMin,
+        tempMax = fc.main.tempMax,
+        feelsLike = fc.main.feelsLike,
+        pressure = fc.main.pressure,
+        humidity = fc.main.humidity,
+        condition = fc.weather.firstOrNull()?.main ?: "—",
+        updatedAt = System.currentTimeMillis()
+    )}
+}*/

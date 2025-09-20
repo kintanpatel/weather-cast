@@ -1,16 +1,9 @@
 package com.techkintan.weathercast.helper
 
-import java.text.Normalizer
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Locale
+import java.util.TimeZone
 
-fun String.normalizedCity(): String {
-    return Normalizer.normalize(this, Normalizer.Form.NFD)
-        .replace("\\p{Mn}+".toRegex(), "")       // Remove diacritics
-        .replace("[^\\p{ASCII}]".toRegex(), "")  // Remove non-ASCII
-        .trim()
-        .lowercase()
-}
 
 fun String.toIndianDateFormatted(): String {
     return try {
