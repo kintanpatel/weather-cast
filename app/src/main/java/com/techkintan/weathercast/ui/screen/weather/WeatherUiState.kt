@@ -1,4 +1,4 @@
-package com.techkintan.weathercast.ui.screen
+package com.techkintan.weathercast.ui.screen.weather
 
 import com.techkintan.weathercast.ui.model.DailyForecast
 

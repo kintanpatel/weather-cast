@@ -1,12 +1,10 @@
-package com.techkintan.weathercast.ui.screen
+package com.techkintan.weathercast.ui.screen.weather
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.techkintan.weathercast.data.repository.WeatherRepository
 import com.techkintan.weathercast.helper.Result
-import com.techkintan.weathercast.ui.screen.WeatherUiState.Error
-import com.techkintan.weathercast.ui.screen.WeatherUiState.Idle
-import com.techkintan.weathercast.ui.screen.WeatherUiState.Loading
+import com.techkintan.weathercast.ui.screen.weather.WeatherUiState.Idle
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,7 +16,7 @@ class WeatherViewModel @Inject constructor(
     private val repository: WeatherRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<WeatherUiState>(Idle)
+    private val _uiState = MutableStateFlow<WeatherUiState>(WeatherUiState.Idle)
     val uiState = _uiState.asStateFlow()
 
     init {
@@ -27,7 +25,7 @@ class WeatherViewModel @Inject constructor(
                 _uiState.value = if (domain != null) {
                     WeatherUiState.Success(domain.cityName, domain.forecasts)
                 } else {
-                    WeatherUiState.Idle
+                    Idle
                 }
             }
         }
@@ -35,11 +33,11 @@ class WeatherViewModel @Inject constructor(
 
     fun fetchWeather(city: String) =
         viewModelScope.launch {
-            _uiState.value = Loading
+            _uiState.value = WeatherUiState.Loading
             val result = repository.refreshForecast(city)
             //Success Will Emit Automatically Via Database Observer
             if (result is Result.Error) {
-                _uiState.value = Error(result.message)
+                _uiState.value = WeatherUiState.Error(result.message)
             }
         }
 }

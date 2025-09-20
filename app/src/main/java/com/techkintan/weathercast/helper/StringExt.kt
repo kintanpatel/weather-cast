@@ -2,21 +2,26 @@ package com.techkintan.weathercast.helper
 
 import java.text.SimpleDateFormat
 import java.util.Locale
-import java.util.TimeZone
 
-
-fun String.toIndianDateFormatted(): String {
+fun String.toDisplayDate(): String {
     return try {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        inputFormat.timeZone = TimeZone.getTimeZone("UTC")
-        val date = inputFormat.parse(this)
-
-        val outputFormat = SimpleDateFormat("dd MMM yyyy, EEE", Locale("en", "IN"))
-        outputFormat.timeZone = TimeZone.getTimeZone("Asia/Kolkata")
-
-        outputFormat.format(date!!)
+        val parser = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+        val formatter = SimpleDateFormat("EEEE dd MMM yyyy", Locale.ENGLISH)
+        val date = parser.parse(this)
+        formatter.format(date!!)
     } catch (e: Exception) {
-        this // fallback to original string if parsing fails
+        this
     }
 }
 
+
+fun String.toDisplayTime(): String {
+    return try {
+        val parser = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+        val formatter = SimpleDateFormat("hh:mm a", Locale.ENGLISH)
+        val date = parser.parse(this)
+        formatter.format(date!!)
+    } catch (e: Exception) {
+        this
+    }
+}
