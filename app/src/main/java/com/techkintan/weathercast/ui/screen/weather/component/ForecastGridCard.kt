@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.techkintan.weathercast.R
@@ -76,9 +77,9 @@ fun ForecastGridCard(day: DailyForecast, modifier: Modifier = Modifier) {
 
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = day.temp, style = MaterialTheme.typography.titleMedium
+                    text = day.temp, style = MaterialTheme.typography.titleMedium,
+                    textAlign = TextAlign.Center
                 )
-
 
                 Text(
                     "↓ ${day.tempMin}  ↑ ${day.tempMax}",

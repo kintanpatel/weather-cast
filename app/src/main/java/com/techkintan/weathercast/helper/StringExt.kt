@@ -25,3 +25,14 @@ fun String.toDisplayTime(): String {
         this
     }
 }
+fun String.toDisplayHour(): String {
+    return try {
+        val parser = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US)
+        val formatter = SimpleDateFormat("h a", Locale.ENGLISH) // 1 AM
+        val date = parser.parse(this)
+        formatter.format(date!!).lowercase(Locale.ENGLISH)      // 1 am
+    } catch (e: Exception) {
+        this
+    }
+}
+

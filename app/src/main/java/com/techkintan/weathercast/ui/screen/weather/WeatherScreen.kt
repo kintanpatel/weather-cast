@@ -11,15 +11,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.GridView
@@ -52,6 +49,7 @@ import com.techkintan.weathercast.helper.toDisplayDate
 import com.techkintan.weathercast.ui.screen.weather.component.CityInputBar
 import com.techkintan.weathercast.ui.screen.weather.component.ErrorState
 import com.techkintan.weathercast.ui.screen.weather.component.ForecastGridCard
+import com.techkintan.weathercast.ui.screen.weather.component.ForecastTimelineRow
 import com.techkintan.weathercast.ui.theme.WeatherCastTheme
 
 @Composable
@@ -137,17 +135,6 @@ fun WeatherScreenContent(
                     val grouped = uiState.items.groupBy { it.date.split(" ")[0].toDisplayDate() }
                     Crossfade(targetState = isGrid, label = "ViewToggle") { grid ->
                         if (grid) {
-                            LazyVerticalGrid(
-                                columns = GridCells.Fixed(2),
-                                verticalArrangement = Arrangement.spacedBy(10.dp),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                modifier = Modifier.fillMaxHeight()
-                            ) {
-                                items(uiState.items) { day ->
-                                    ForecastGridCard(day)
-                                }
-                            }
-                        } else {
                             LazyColumn(
                                 modifier = Modifier.fillMaxSize(),
                                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -168,6 +155,27 @@ fun WeatherScreenContent(
                                                 ForecastGridCard(forecast)
                                             }
                                         }
+                                    }
+                                }
+                            }
+
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.spacedBy(10.dp),
+                                contentPadding = PaddingValues(vertical = 8.dp)
+                            ) {
+                                grouped.forEach { (date, forecastsForDay) ->
+                                    item {
+                                        Text(
+                                            date,
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                    }
+                                    items(forecastsForDay) { forecast ->
+                                        ForecastTimelineRow(
+                                            forecast = forecast
+                                        )
                                     }
                                 }
                             }
