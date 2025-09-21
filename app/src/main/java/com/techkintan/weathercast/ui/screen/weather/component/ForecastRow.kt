@@ -1,21 +1,18 @@
 package com.techkintan.weathercast.ui.screen.weather.component
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,7 +40,14 @@ fun ForecastRow(day: DailyForecast) {
     ) {
         Box {
             // Faded Background Icon
-            Image(
+            AnimatedWeatherIcon(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .alpha(0.08f) // light fade
+                    .padding(end = 16.dp),
+                getWeatherIcon(day.condition)
+            )
+            /*Image(
                 imageVector = ImageVector.vectorResource(getWeatherIcon(day.condition)),
                 contentDescription = null,
                 modifier = Modifier
@@ -51,7 +55,7 @@ fun ForecastRow(day: DailyForecast) {
                     .alpha(0.08f) // light fade
                     .padding(end = 16.dp),
                 alignment = Alignment.CenterEnd
-            )
+            )*/
 
             // Foreground Content
             Column(modifier = Modifier.padding(14.dp)) {
@@ -81,21 +85,19 @@ fun ForecastRow(day: DailyForecast) {
                         contentDescription = null,
                         modifier = Modifier.size(28.dp)
                     )
-                    Text(
-                        "↓ ${day.tempMin}  ↑ ${day.tempMax}",
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                    MinMaxTempText(minTemp = day.tempMin, maxTemp = day.tempMax)
                 }
                 Spacer(Modifier.height(10.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Row {
+                    Spacer(Modifier.width(6.dp))
                     IconWithText(iconRes = R.drawable.ic_humidity, label = day.humidity)
                 }
             }
-            Text(
+            TempText(
+                temp = day.temp,
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .padding(horizontal = 12.dp),
-                text = day.temp, style = MaterialTheme.typography.headlineLarge
             )
         }
     }

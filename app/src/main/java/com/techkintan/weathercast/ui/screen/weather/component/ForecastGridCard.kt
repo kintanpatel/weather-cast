@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.techkintan.weathercast.R
@@ -37,16 +36,21 @@ fun ForecastGridCard(day: DailyForecast, modifier: Modifier = Modifier) {
             modifier = Modifier.fillMaxSize()
         ) {
 
-            Image(
-                imageVector = ImageVector.vectorResource(getWeatherIcon(day.condition)),
-                contentDescription = null,
-                modifier = Modifier
+//            Image(
+//                imageVector = ImageVector.vectorResource(getWeatherIcon(day.condition)),
+//                contentDescription = null,
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .align(Alignment.BottomEnd)
+//                    .alpha(0.06f)
+//                    .padding(10.dp),
+//                alignment = Alignment.BottomEnd
+//            )
+            AnimatedWeatherIcon(modifier = Modifier
                     .fillMaxSize()
                     .align(Alignment.BottomEnd)
                     .alpha(0.06f)
-                    .padding(10.dp),
-                alignment = Alignment.BottomEnd
-            )
+                    .padding(10.dp),getWeatherIcon(day.condition))
 
             // Foreground weather details
             Column(
@@ -74,17 +78,9 @@ fun ForecastGridCard(day: DailyForecast, modifier: Modifier = Modifier) {
                         )
                     }
                 }
+                TempText(temp = day.temp)
 
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = day.temp, style = MaterialTheme.typography.titleMedium,
-                    textAlign = TextAlign.Center
-                )
-
-                Text(
-                    "↓ ${day.tempMin}  ↑ ${day.tempMax}",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                MinMaxTempText(minTemp = day.tempMin, maxTemp = day.tempMax)
 
 
                 IconWithText(

@@ -35,10 +35,10 @@ class ForecastEntity(
 fun ForecastEntity.toUi(): DailyForecast =
     DailyForecast(
         date = date, // raw "yyyy-MM-dd" (format in UI if needed)
-        temp = "$temp°C",
-        tempMin = "${tempMin}°C",
-        tempMax = "${tempMax}°C",
-        feelsLike = "${(feelsLike * 10).roundToInt() / 10.0}°C",
+        temp = "$temp",
+        tempMin = "$tempMin",
+        tempMax = "$tempMax",
+        feelsLike = "${(feelsLike * 10).roundToInt() / 10.0}",
         pressure = "$pressure hPa",
         humidity = "$humidity%",
         condition = condition

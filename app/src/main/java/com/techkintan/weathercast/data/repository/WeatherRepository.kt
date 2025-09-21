@@ -1,7 +1,6 @@
 package com.techkintan.weathercast.data.repository
 
 import com.techkintan.weathercast.data.local.dao.WeatherDao
-import com.techkintan.weathercast.data.local.entity.CityWithForecasts
 import com.techkintan.weathercast.data.local.entity.toUi
 import com.techkintan.weathercast.data.local.preferences.CityPreferenceManager
 import com.techkintan.weathercast.data.remote.WeatherApi

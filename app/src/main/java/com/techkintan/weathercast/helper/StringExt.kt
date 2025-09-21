@@ -6,7 +6,7 @@ import java.util.Locale
 fun String.toDisplayDate(): String {
     return try {
         val parser = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-        val formatter = SimpleDateFormat("EEEE dd MMM yyyy", Locale.ENGLISH)
+        val formatter = SimpleDateFormat("EEE dd MMM yyyy", Locale.ENGLISH)
         val date = parser.parse(this)
         formatter.format(date!!)
     } catch (e: Exception) {
