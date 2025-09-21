@@ -10,6 +10,7 @@ import com.techkintan.weathercast.data.remote.toEntity
 import com.techkintan.weathercast.helper.Result
 import com.techkintan.weathercast.helper.safeApiCall
 import com.techkintan.weathercast.ui.model.CityForecastDomain
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -28,6 +29,7 @@ class WeatherRepositoryImpl @Inject constructor(
     private val cityPrefs: CityPreferenceManager
 
 ) : WeatherRepository {
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun observeForecast(): Flow<CityForecastDomain?> {
         return cityPrefs.lastCityIdFlow.flatMapLatest { cityId ->
             if (cityId != null) {
@@ -64,20 +66,5 @@ class WeatherRepositoryImpl @Inject constructor(
             cityPrefs.updateLastCityId(response.city.id)
         }
     }
-
-    /*override suspend fun refreshForecast(cityName: String) {
-        val response = api.getWeatherForecast(city = cityName, cnt = 24, apiKey = apiKey)
-        safeApiCall {  }
-
-        // save city in DB
-        dao.insertCity(response.city.toEntity())
-
-        // replace forecasts
-        dao.clearForecasts(response.city.id)
-        dao.insertForecast(response.toEntities())
-
-        // save cityId for offline use
-        cityPrefs.updateLastCityId(response.city.id)
-    }*/
 
 }
