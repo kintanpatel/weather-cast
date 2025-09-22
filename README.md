@@ -59,9 +59,9 @@ OPEN_WEATHER_API_KEY = <Your API Key>
 ###  Screenshots
 
 | Light Mode                           | Dark Mode                          |
-| ------------------------------------ | ---------------------------------- |
-| ![Light](screenshots/light_mode.png) | ![Dark](screenshots/dark_mode.png) |
+| ------------------------------------ |------------------------------------|
 | ![Light](screenshots/light_mode_grid.png) | ![Dark](screenshots/dark_mode_grid.png) |
+| ![Light](screenshots/light_mode.png) | ![Dark](screenshots/dark_mode.png) |
 
 
 ---
