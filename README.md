@@ -2,13 +2,17 @@
 ## 🌤️ WeatherCast
 
 A modern weather forecast app built with Jetpack Compose. It supports both **light and dark themes**, works **offline**, and shows a **3-day weather forecast** based on city name using OpenWeatherMap API.
+<div align="center">
+  <img src="screenshots/light_mode.png" width="220" style="margin: 10px;" />
+  <img src="screenshots/light_mode_grid.png" width="220" style="margin: 10px;" />
+</div>
 
-<p align="center">
-  <img src="screenshots/light_mode.png" width="220" />
-  <img src="screenshots/dark_mode.png" width="220" />
-  <img src="screenshots/light_mode.png" width="220" />
-  <img src="screenshots/dark_mode.png" width="220" />
-</p>
+<div align="center">
+  <img src="screenshots/dark_mode.png" width="220" style="margin: 10px;" />
+  <img src="screenshots/dark_mode_grid.png" width="220" style="margin: 10px;" />
+</div>
+
+
 
 
 
