@@ -3,10 +3,14 @@
 
 A modern weather forecast app built with Jetpack Compose. It supports both **light and dark themes**, works **offline**, and shows a **3-day weather forecast** based on city name using OpenWeatherMap API.
 
-<div align="center">
-  <img src="screenshots/light_mode.png" width="220"/>
-  <img src="screenshots/dark_mode.png" width="220"/>
-</div>
+<p align="center">
+  <img src="screenshots/light_mode.png" width="220" />
+  <img src="screenshots/dark_mode.png" width="220" />
+  <img src="screenshots/light_mode.png" width="220" />
+  <img src="screenshots/dark_mode.png" width="220" />
+</p>
+
+
 
 ---
 
@@ -53,16 +57,6 @@ OPEN_WEATHER_API_KEY = <Your API Key>
 * Data is fetched and stored locally
 * Offline mode uses cached results
 * Errors (e.g., 404, no network) are shown with icons
-
----
-
-###  Screenshots
-
-| Light Mode                           | Dark Mode                          |
-| ------------------------------------ |------------------------------------|
-| ![Light](screenshots/light_mode_grid.png) | ![Dark](screenshots/dark_mode_grid.png) |
-| ![Light](screenshots/light_mode.png) | ![Dark](screenshots/dark_mode.png) |
-
 
 ---
 
